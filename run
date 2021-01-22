@@ -1,0 +1,46 @@
+#!/bin/bash
+DIRECTORY=$(dirname "$0")
+echo "Changing to ${DIRECTORY}"
+cd  "$DIRECTORY" || exit 1
+echo "Run your project here."
+
+# parse command line arguments for runing program
+rootCert="pebble.minica.pem"
+
+challenge="$1"
+shift
+domains=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -d|--dir)
+    dir="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -r|--record)
+    record="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -d|--domain)
+    domains+=("$2")
+    shift # past argument
+    shift # past value
+    ;;
+    -r | --revoke)
+    revoke=" --revoke"
+    shift # past argument
+    ;;
+    *)    
+    ;;
+esac
+done
+
+# add all domains to string
+domain_str=$(IFS=,;printf  "%s" "${domains[*]}")
+
+./main --challenge=$challenge --dir=$dir --record=$record --domain=$domain_str --cert=$rootCert $revoke
+
+
